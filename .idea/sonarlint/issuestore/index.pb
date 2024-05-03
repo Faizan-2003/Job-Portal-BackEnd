@@ -34,3 +34,5 @@ R
 "app/Controllers/UserController.php,2\5\25a510723f9828a9806921a4c16437717d29481f
 Q
 !app/Controllers/JobController.php,9\4\9499cde336dab23c2b9d0f9af3260617b9c79232
+e
+5app/vendor/bramus/router/src/Bramus/Router/Router.php,d\8\d8b5c2eeb020e6ffbf1b5e1032b2895781b53eab

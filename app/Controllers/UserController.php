@@ -3,7 +3,7 @@
 namespace Controllers;
 
 class UserController{
-private $userService;
+    private $userService;
     private $jobService;
 
     function __construct($userService, $jobService)
@@ -21,14 +21,14 @@ private $userService;
         return null;
     }
 
-    function getJobList()
+    function register()
     {
-        return $this->jobService->getAllJobs();
+        $user = $this->userService->registerUser();
+        if ($user) {
+            return $user;
+        }
+        return null;
     }
 
-    function getUserDetails($userID)
-    {
-        return $this->userService->getUserbyID($userID);
-    }
 
 }
