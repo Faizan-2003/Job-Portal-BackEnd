@@ -2,33 +2,45 @@
 
 namespace Controllers;
 
-class UserController{
+use Controllers\AbstractController;
+
+class UserController extends AbstractController {
     private $userService;
-    private $jobService;
 
-    function __construct($userService, $jobService)
-    {
-        $this->userService = $userService;
-        $this->jobService = $jobService;
+    public function __construct() {
+        $this->userService = new \Services\UserService();
     }
 
-    function login($email, $password)
-    {
-        $user = $this->userService->verifyAndGetUser($email, $password);
-        if($user){
-            return $user;
+    public function login() {
+        // Retrieve and decode JSON payload
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        // Validate input
+        if (!isset($data['email']) || !isset($data['password'])) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'errors' => ['other' => 'Email and password are required']]);
+            return;
         }
-        return null;
+
+        $email = $data['email'];
+        $password = $data['password'];
+
+        $user = $this->userService->verifyAndGetUser($email, $password);
+
+        if ($user) {
+            $jwt = $this->userService->generateJWT($user);
+            echo json_encode(['success' => true, 'token' => $jwt]);
+        } else {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'errors' => ['other' => 'Invalid email or password']]);
+        }
     }
 
-    function register()
-    {
+    public function register() {
         $user = $this->userService->registerUser();
         if ($user) {
             return $user;
         }
         return null;
     }
-
-
 }

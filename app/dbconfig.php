@@ -1,6 +1,6 @@
 <?php
-$db_host = "mysql";
-$db_name = "jobPortaldb";
-$db_username = "dbuser";
-$db_password = "jobportal123";
-
+$type = "mysql";
+$servername = "mysql";
+$username = "dbuser";
+$password = "jobportal123";
+$database = "jobPortaldb";

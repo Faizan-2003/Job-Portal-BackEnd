@@ -2,7 +2,7 @@
 
 namespace Controllers;
 
-class JobController{
+class JobController extends AbstractController{
 
     private $jobService;
 
