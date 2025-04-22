@@ -42,6 +42,7 @@ $base = '/api';
 // User Management endpoints
 $router->post($base . '/register', 'UserController@register');
 $router->post($base . '/login', 'UserController@login');
+$router->get($base . '/jobs', 'JobController@getJobList');
 
 // Run the router
 $router->run();

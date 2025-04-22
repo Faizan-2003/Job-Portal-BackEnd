@@ -2,17 +2,24 @@
 
 namespace Controllers;
 
-class JobController extends AbstractController{
-
+class JobController extends AbstractController {
     private $jobService;
 
-    function __construct($jobService)
+    public function __construct()
     {
-        $this->jobService = $jobService;
+        $this->jobService = new \Services\JobService();
     }
 
-    function getJobList()
+    public function getJobList()
     {
-        return $this->jobService->getAllJobs();
+        $this->checkForJwt();
+
+        try {
+            $jobs = $this->jobService->getAllJobs();
+            $this->respond(['success' => true, 'jobs' => $jobs]);
+        } catch (\Exception $e) {
+            error_log("Error in getJobList: " . $e->getMessage());
+            $this->respondWithError(500, "Failed to fetch job list");
+        }
     }
 }

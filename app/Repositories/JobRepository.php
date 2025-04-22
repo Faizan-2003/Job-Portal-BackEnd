@@ -6,20 +6,18 @@ use Models\Jobs;
 use PDO;
 use PDOException;
 
-class JobRepository extends Repository{
-
-    public function getAllJobs(){
+class JobRepository extends Repository {
+    public function getAllJobs(): array
+    {
         try {
-            $stmt = $this->connection->prepare("SELECT * FROM jobs");
+            $query = "SELECT * FROM jobs"; 
+            $stmt = $this->connection->prepare($query);
             $stmt->execute();
 
-            $jobs = $stmt->fetchAll(PDO::FETCH_CLASS, 'Models\Jobs');
-
-            return $jobs;
-
-        } catch (PDOException $e) {
-            $this->handleError($e);
-            return null;
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Database error in getAllJobs: " . $e->getMessage());
+            return [];
         }
     }
 }

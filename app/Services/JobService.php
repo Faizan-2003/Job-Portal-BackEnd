@@ -4,16 +4,16 @@ namespace Services;
 
 use Repositories\JobRepository;
 
-class JobService
-{
+
+class JobService {
     private $jobRepository;
 
-    function __construct($jobRepository)
+    public function __construct()
     {
-        $this->jobRepository = $jobRepository;
+        $this->jobRepository = new JobRepository();
     }
 
-    function getAllJobs()
+    public function getAllJobs(): array
     {
         return $this->jobRepository->getAllJobs();
     }

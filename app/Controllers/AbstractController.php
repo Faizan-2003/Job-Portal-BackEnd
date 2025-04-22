@@ -8,22 +8,23 @@ use Firebase\JWT\Key;
 
 abstract class AbstractController
 {
-    protected function checkForJwt(){
-        if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
-            $this->respondWithError(401, "No token provided");
-            return;
+    protected function checkForJwt()
+    {
+        $headers = getallheaders();
+        if (!isset($headers['Authorization'])) {
+            $this->respondWithError(401, 'Authorization token is missing');
+            exit();
         }
-        // Read JWT from header
-        $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
-        // Strip the "Bearer " prefix from the header
-        $jwt = str_replace("Bearer ", "", $authHeader);
-        // Decode JWT
-        $secret_key = "IT_IS_A_SECRET";
+
+        $authHeader = $headers['Authorization'];
+        $token = str_replace('Bearer ', '', $authHeader);
+
         try {
-            return JWT::decode($jwt, new Key($secret_key, 'HS256'));
-        } catch (Exception $e) {
-            $this->respondWithError(401, $e->getMessage());
-            return;
+            $decoded = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key('SHH_SECRET', 'HS256'));
+            return $decoded;
+        } catch (\Exception $e) {
+            $this->respondWithError(401, 'Invalid or expired token');
+            exit();
         }
     }
 
