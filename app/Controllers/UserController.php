@@ -11,34 +11,51 @@ class UserController extends AbstractController {
         $this->userService = new \Services\UserService();
     }
 
-    public function login() {
+    public function login()
+    {
+        $credentials = $this->getSanitizedData();
         try {
-            $data = json_decode(file_get_contents('php://input'), true);
-
-            if (!isset($data['email']) || !isset($data['password'])) {
-                http_response_code(400);
-                echo json_encode(['success' => false, 'errors' => ['other' => 'Email and password are required']]);
-                return;
-            }
-
-            $email = $data['email'];
-            $password = $data['password'];
-
-            $user = $this->userService->verifyAndGetUser($email, $password);
-
-            if ($user) {
-                $jwt = $this->userService->generateJWT($user);
-                http_response_code(200);
-                echo json_encode(['success' => true, 'token' => $jwt]);
-            } else {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'errors' => ['other' => 'Invalid email or password']]);
-            }
-        } catch (\Exception $e) {
-            error_log("Exception in login: " . $e->getMessage());
-            http_response_code(500);
-            echo json_encode(['success' => false, 'errors' => ['other' => 'An unexpected error occurred']]);
+            $user = $this->userService->verifyAndGetUser($credentials->email, $credentials->password);
+        } catch (\Models\Exceptions\NotFoundException $e) {
+            $this->respondWithError(401, $e->getMessage());
+            return;
         }
+        if (empty($user)) {
+            $this->respondWithError(401, "Invalid Password Try Again");
+            return;
+        }
+    
+        // Generate JWT token
+        $token = $this->generateJWT($user);
+    
+        // Prepare response payload
+        $response = [
+            'success' => true,
+            'token' => $token,
+            'userEmail' => $user->userEmail,
+            'userType' => $user->userType
+        ];
+    
+        // Respond with the payload
+        $this->respond($response);
+    }
+
+    public function generateJWT($user)
+    {
+        $secret_key = "SHH_SECRET";
+        $issuedAt = time();
+        $expirationTime = $issuedAt + 3600;
+        $payload = [
+            'iat' => $issuedAt,
+            'exp' => $expirationTime,
+            'data' => [
+                'id' => $user->userID,
+                'email' => $user->userEmail,
+                'name' => $user->userName
+            ]
+        ];
+    
+        return \Firebase\JWT\JWT::encode($payload, $secret_key, 'HS256');
     }
 
     public function register() {
