@@ -32,7 +32,7 @@ class UserController extends AbstractController {
         $response = [
             'success' => true,
             'token' => $token,
-            'userEmail' => $user->userEmail,
+            'userEmail' => $user->userName,
             'userType' => $user->userType
         ];
     
