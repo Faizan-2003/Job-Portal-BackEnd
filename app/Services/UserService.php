@@ -16,8 +16,16 @@ class UserService {
     public function verifyAndGetUser($email, $enteredPassword) {
         $user = $this->userRepository->getUserByEmail($email);
 
-        if ($user && password_verify($enteredPassword, $user->userPassword)) { // Use userPassword
+        if (!$user) {
+            error_log("User not found for email: $email");
+            return null;
+        }
+
+        if (password_verify($enteredPassword, $user->userPassword)) {
+            error_log("Password verified for user: $email");
             return $user;
+        } else {
+            error_log("Password verification failed for user: $email");
         }
 
         return null;
@@ -25,7 +33,7 @@ class UserService {
 
     public function generateJWT($user) {
         $issuedAt = time();
-        $expirationTime = $issuedAt + 3600; // jwt valid for 1 hour
+        $expirationTime = $issuedAt + 3600;
         $payload = [
             'iat' => $issuedAt,
             'exp' => $expirationTime,
@@ -41,5 +49,8 @@ class UserService {
 
     public function getUserbyID($userID) {
         return $this->userRepository->getUserbyID($userID);
+    }
+    public function registerUser($name, $email, $type, $hashedPassword) {
+        return $this->userRepository->createUser($name, $email, $type, $hashedPassword);
     }
 }
