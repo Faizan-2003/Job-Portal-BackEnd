@@ -7,21 +7,7 @@ use PDO;
 use PDOException;
 
 class UserRepository extends Repository {
-    // public function authenticateAndGetUser($username, $password): ?user
-    // {
-    //     $query = "SELECT userName, userType, userEmail, userPassword FROM user WHERE userEmail = :userEmail";
-    //     $params = array(
-    //         ":userEmail" => $userEmail
-    //     );
-    //     $result = $this->ExecQueryAndGetResults($query, $params, false);
-    //     if (!$this->checkIfUserExist($userEmail)) {
-    //         throw new NotFoundException("This {$userEmail} username does not exist.");
-    //     }
-    //     if ($this->verifyPassword($password, $result["password"])) {
-    //         return new user($result["userID"], $result["userName"], $result["userPassword"], $result["userEmail"], role::createFrom($result["userType"]));
-    //     }
-    //     return null;
-    // }
+
 
 
 public function authenticateAndGetUser($username, $password): ?User
@@ -54,21 +40,19 @@ public function authenticateAndGetUser($username, $password): ?User
         return null;
     }
 }
-    public function getUserbyID($userID) {
-        try {
-            $stmt = $this->connection->prepare("SELECT * FROM user WHERE userID = :userID");
-            $stmt->bindParam(":userID", $userID);
-            $stmt->execute();
+public function getUserbyID($userID)
+{
+    try {
+        $stmt = $this->connection->prepare("SELECT * FROM user WHERE userID = :userID");
+        $stmt->bindParam(":userID", $userID, PDO::PARAM_INT);
+        $stmt->execute();
 
-            $user = $stmt->fetchObject('Models\User');
-
-            return $user;
-
-        } catch (PDOException $e) {
-            $this->handleError($e);
-            return null;
-        }
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (\PDOException $e) {
+        error_log("Database error in getUserbyID: " . $e->getMessage());
+        return null;
     }
+}
 
     public function getUserByEmail($email) {
         try {
@@ -103,7 +87,7 @@ public function authenticateAndGetUser($username, $password): ?User
             $stmt->bindParam(':password', $hashedPassword);
 
             if ($stmt->execute()) {
-                return $this->connection->lastInsertId(); // Return the ID of the newly created user
+                return $this->connection->lastInsertId(); 
             }
 
             return null;

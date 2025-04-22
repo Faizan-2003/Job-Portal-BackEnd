@@ -94,4 +94,22 @@ class UserController extends AbstractController {
             echo json_encode(['success' => false, 'errors' => ['other' => 'An unexpected error occurred']]);
         }
     }
+    public function getUserByID($id)
+{
+    try {
+        $user = $this->userService->getUserbyID($id);
+
+        if ($user) {
+            http_response_code(200); 
+            echo json_encode(['success' => true, 'user' => $user]);
+        } else {
+            http_response_code(404); 
+            echo json_encode(['success' => false, 'errors' => ['other' => 'User not found']]);
+        }
+    } catch (\Exception $e) {
+        error_log("Exception in getUserByID: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['success' => false, 'errors' => ['other' => 'An unexpected error occurred']]);
+    }
+}
 }

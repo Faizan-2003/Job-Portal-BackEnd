@@ -43,6 +43,7 @@ $base = '/api';
 $router->post($base . '/register', 'UserController@register');
 $router->post($base . '/login', 'UserController@login');
 $router->get($base . '/jobs', 'JobController@getJobList');
+$router->get($base . '/user/(\d+)', 'UserController@getUserByID');
 
 // Run the router
 $router->run();

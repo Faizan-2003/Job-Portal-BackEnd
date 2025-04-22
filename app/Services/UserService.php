@@ -18,10 +18,11 @@ class UserService {
         return $this->userRepository->authenticateAndGetUser($email, $password);
     }
 
-    public function getUserbyID($userID) {
-        return $this->userRepository->getUserbyID($userID);
-    }
     public function registerUser($name, $email, $type, $hashedPassword) {
         return $this->userRepository->createUser($name, $email, $type, $hashedPassword);
     }
+    public function getUserbyID($userID)
+{
+    return $this->userRepository->getUserbyID($userID);
+}
 }
