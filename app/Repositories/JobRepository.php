@@ -34,4 +34,70 @@ class JobRepository extends Repository {
             return [];
         }
     }
+    public function getJobByID($id)
+{
+    try {
+        $stmt = $this->connection->prepare("SELECT * FROM jobs WHERE jobID = :jobID");
+        $stmt->bindParam(":jobID", $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (\PDOException $e) {
+        error_log("Database error in getJobByID: " . $e->getMessage());
+        return null;
+    }
+}
+public function addJob($data)
+{
+    try {
+        $stmt = $this->connection->prepare("
+            INSERT INTO jobs (jobTitle, jobDescription, jobCompany, location, salary) 
+            VALUES (:jobTitle, :jobDescription, :jobCompany, :location, :salary)
+        ");
+        $stmt->bindParam(":jobTitle", $data['jobTitle']);
+        $stmt->bindParam(":jobDescription", $data['jobDescription']);
+        $stmt->bindParam(":jobCompany", $data['jobCompany']);
+        $stmt->bindParam(":location", $data['location']);
+        $stmt->bindParam(":salary", $data['salary']);
+        $stmt->execute();
+
+        return $this->connection->lastInsertId();
+    } catch (\PDOException $e) {
+        error_log("Database error in addJob: " . $e->getMessage());
+        return null;
+    }
+}
+public function editJob($id, $data)
+{
+    try {
+        $stmt = $this->connection->prepare("
+            UPDATE jobs 
+            SET jobTitle = :jobTitle, jobDescription = :jobDescription, jobCompany = :jobCompany, location = :location, salary = :salary
+            WHERE jobID = :jobID
+        ");
+        $stmt->bindParam(":jobTitle", $data['jobTitle']);
+        $stmt->bindParam(":jobDescription", $data['jobDescription']);
+        $stmt->bindParam(":jobCompany", $data['jobCompany']);
+        $stmt->bindParam(":location", $data['location']);
+        $stmt->bindParam(":salary", $data['salary']);
+        $stmt->bindParam(":jobID", $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    } catch (\PDOException $e) {
+        error_log("Database error in editJob: " . $e->getMessage());
+        return false;
+    }
+}
+public function deleteJob($id)
+{
+    try {
+        $stmt = $this->connection->prepare("DELETE FROM jobs WHERE jobID = :jobID");
+        $stmt->bindParam(":jobID", $id, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    } catch (\PDOException $e) {
+        error_log("Database error in deleteJob: " . $e->getMessage());
+        return false;
+    }
+}
 }
