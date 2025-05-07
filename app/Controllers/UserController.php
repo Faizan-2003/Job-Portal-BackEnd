@@ -31,6 +31,7 @@ class UserController extends AbstractController {
         // Prepare response payload
         $response = [
             'success' => true,
+            'id' => $user->userID,
             'token' => $token,
             'userEmail' => $user->userName,
             'userType' => $user->userType
@@ -69,7 +70,7 @@ class UserController extends AbstractController {
                 echo json_encode(['success' => false, 'errors' => ['other' => 'Name, email, type, and password are required']]);
                 return;
             }
-    
+
             $name = $data['name'];
             $email = $data['email'];
             $type = $data['type'];
@@ -78,7 +79,6 @@ class UserController extends AbstractController {
             // Hash the password
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     
-            // Call the service to register the user
             $user = $this->userService->registerUser($name, $email, $type, $hashedPassword);
     
             if ($user) {

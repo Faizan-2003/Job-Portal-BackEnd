@@ -20,4 +20,18 @@ class JobRepository extends Repository {
             return [];
         }
     }
+    public function getJobsByCompany($companyId): array
+    {
+        try {
+            $query = "SELECT * FROM jobs WHERE jobCompany = :companyId"; 
+            $stmt = $this->connection->prepare($query);
+            $stmt->bindParam(":companyId", $companyId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Database error in getJobsByCompany: " . $e->getMessage());
+            return [];
+        }
+    }
 }

@@ -17,4 +17,8 @@ class JobService {
     {
         return $this->jobRepository->getAllJobs();
     }
+    public function getJobsByCompany($companyId): array
+    {
+        return $this->jobRepository->getJobsByCompany($companyId);
+    }
 }
