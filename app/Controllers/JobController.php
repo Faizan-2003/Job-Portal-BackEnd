@@ -42,7 +42,7 @@ class JobController extends AbstractController {
 }
 public function getJobByID($id)
 {
-    $this->checkForJwt(); // Ensure the user is authenticated
+    $this->checkForJwt(); 
 
     try {
         $job = $this->jobService->getJobByID($id);
@@ -63,7 +63,6 @@ public function addJob()
     $this->checkForJwt();
 
     try {
-        // Check required fields
         if (
             !isset($_POST['jobTitle'], $_POST['jobDescription'], $_POST['jobSalary'], $_POST['jobLocation'], $_POST['jobCompany'])
         ) {
@@ -72,7 +71,6 @@ public function addJob()
         }
 
         $filename = null;
-        // Handle file upload if present
         if (isset($_FILES['coverImage']) && $_FILES['coverImage']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = __DIR__ . '/../Public/img/';
             if (!is_dir($uploadDir)) {
@@ -88,14 +86,13 @@ public function addJob()
             }
         }
 
-        // Prepare job data
         $data = [
             'jobTitle' => $_POST['jobTitle'],
             'jobDescription' => $_POST['jobDescription'],
             'jobSalary' => $_POST['jobSalary'],
             'jobLocation' => $_POST['jobLocation'],
             'jobCompany' => $_POST['jobCompany'],
-            'coverImage' => $filename, // Only store filename or null
+            'coverImage' => $filename,
             'jobApplicant' => $_POST['jobApplicant'] ?? null,
             'jobPostedDate' => $_POST['jobPostedDate'] ?? date('Y-m-d H:i:s')
         ];
@@ -117,17 +114,49 @@ public function editJob($id)
     $this->checkForJwt(); // Ensure the user is authenticated
 
     try {
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        if (!isset($data['jobTitle'], $data['jobDescription'], $data['jobCompany'], $data['location'])) {
-            $this->respondWithError(400, "Missing required fields");
-            return;
+        $isJson = strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false;
+        if ($isJson) {
+            $data = json_decode(file_get_contents('php://input'), true);
+            $filename = $data['coverImage'] ?? null;
+        } else {
+            $data = $_POST;
+            $filename = $data['coverImage'] ?? null;
+            if (isset($_FILES['coverImage']) && $_FILES['coverImage']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../Public/img/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $file = $_FILES['coverImage'];
+                $filename = uniqid() . '_' . basename($file['name']);
+                $targetPath = $uploadDir . $filename;
+                if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+                    $this->respondWithError(500, "Failed to upload image");
+                    return;
+                }
+            }
         }
 
-        $updated = $this->jobService->editJob($id, $data);
+        $required = ['jobTitle', 'jobDescription', 'jobCompany', 'jobLocation'];
+        foreach ($required as $field) {
+            if (!isset($data[$field]) || trim($data[$field]) === '') {
+                $this->respondWithError(400, "Missing required field: $field");
+                return;
+            }
+        }
+
+        $updateData = [
+            'jobTitle' => $data['jobTitle'],
+            'jobDescription' => $data['jobDescription'],
+            'jobSalary' => $data['jobSalary'] ?? null,
+            'jobLocation' => $data['jobLocation'],
+            'jobCompany' => $data['jobCompany'],
+            'coverImage' => $filename 
+        ];
+
+        $updated = $this->jobService->editJob($id, $updateData);
 
         if ($updated) {
-            $this->respond(['success' => true, 'message' => "Job updated successfully"]);
+            $this->respond(['success' => true, 'message' => "Job updated successfully", 'coverImage' => $filename]);
         } else {
             $this->respondWithError(404, "Job not found or failed to update");
         }
@@ -138,7 +167,7 @@ public function editJob($id)
 }
 public function deleteJob($id)
 {
-    $this->checkForJwt(); // Ensure the user is authenticated
+    $this->checkForJwt(); 
 
     try {
         $deleted = $this->jobService->deleteJob($id);

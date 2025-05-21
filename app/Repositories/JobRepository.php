@@ -73,14 +73,15 @@ public function editJob($id, $data)
     try {
         $stmt = $this->connection->prepare("
             UPDATE jobs 
-            SET jobTitle = :jobTitle, jobDescription = :jobDescription, jobCompany = :jobCompany, location = :location, salary = :salary
+            SET coverImage = :coverImage, jobTitle = :jobTitle, jobDescription = :jobDescription, jobCompany = :jobCompany, jobLocation = :jobLocation, jobSalary = :jobSalary
             WHERE jobID = :jobID
         ");
+        $stmt->bindParam(":coverImage", $data['coverImage']);
         $stmt->bindParam(":jobTitle", $data['jobTitle']);
         $stmt->bindParam(":jobDescription", $data['jobDescription']);
         $stmt->bindParam(":jobCompany", $data['jobCompany']);
-        $stmt->bindParam(":location", $data['location']);
-        $stmt->bindParam(":salary", $data['salary']);
+        $stmt->bindParam(":jobLocation", $data['jobLocation']);
+        $stmt->bindParam(":jobSalary", $data['jobSalary']);
         $stmt->bindParam(":jobID", $id, PDO::PARAM_INT);
 
         return $stmt->execute();

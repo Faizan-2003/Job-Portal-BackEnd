@@ -63,7 +63,7 @@ $router->get($base . '/user/(\d+)', 'UserController@getUserByID');
 $router->get($base . '/jobs/company/(\d+)', 'JobController@getJobsByCompany');
 $router->get($base . '/job/(\d+)', 'JobController@getJobByID');
 $router->post($base . '/job/add', 'JobController@addJob');
-$router->put($base . '/job/edit/(\d+)', 'JobController@editJob');
+$router->post($base . '/job/edit/(\d+)', 'JobController@editJob');
 $router->delete($base . '/job/delete/(\d+)', 'JobController@deleteJob');
 
 // Run the router
