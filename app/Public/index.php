@@ -39,6 +39,22 @@ $router->setNamespace('Controllers');
 
 $base = '/api';
 
+// Serve static images from /img/{filename}
+$router->get('/img/(.*)', function($filename) {
+    $filePath = __DIR__ . '/img/' . basename($filename);
+    if (file_exists($filePath)) {
+        $mimeType = mime_content_type($filePath);
+        header('Content-Type: ' . $mimeType);
+        header('Content-Length: ' . filesize($filePath));
+        readfile($filePath);
+        exit();
+    } else {
+        http_response_code(404);
+        echo 'File not found';
+        exit();
+    }
+});
+
 // User Management endpoints
 $router->post($base . '/register', 'UserController@register');
 $router->post($base . '/login', 'UserController@login');

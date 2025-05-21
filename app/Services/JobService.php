@@ -28,7 +28,8 @@ class JobService {
 public function addJob($data)
 {
     return $this->jobRepository->addJob($data);
-}public function editJob($id, $data)
+}
+public function editJob($id, $data)
 {
     return $this->jobRepository->editJob($id, $data);
 }

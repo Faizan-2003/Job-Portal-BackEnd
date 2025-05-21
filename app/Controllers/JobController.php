@@ -57,22 +57,53 @@ public function getJobByID($id)
         $this->respondWithError(500, "Failed to fetch job");
     }
 }
+
 public function addJob()
 {
-    $this->checkForJwt(); // Ensure the user is authenticated
+    $this->checkForJwt();
 
     try {
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        if (!isset($data['jobTitle'], $data['jobDescription'], $data['jobCompany'], $data['location'])) {
+        // Check required fields
+        if (
+            !isset($_POST['jobTitle'], $_POST['jobDescription'], $_POST['jobSalary'], $_POST['jobLocation'], $_POST['jobCompany'])
+        ) {
             $this->respondWithError(400, "Missing required fields");
             return;
         }
 
+        $filename = null;
+        // Handle file upload if present
+        if (isset($_FILES['coverImage']) && $_FILES['coverImage']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/../Public/img/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            $file = $_FILES['coverImage'];
+            $filename = uniqid() . '_' . basename($file['name']);
+            $targetPath = $uploadDir . $filename;
+
+            if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+                $this->respondWithError(500, "Failed to upload image");
+                return;
+            }
+        }
+
+        // Prepare job data
+        $data = [
+            'jobTitle' => $_POST['jobTitle'],
+            'jobDescription' => $_POST['jobDescription'],
+            'jobSalary' => $_POST['jobSalary'],
+            'jobLocation' => $_POST['jobLocation'],
+            'jobCompany' => $_POST['jobCompany'],
+            'coverImage' => $filename, // Only store filename or null
+            'jobApplicant' => $_POST['jobApplicant'] ?? null,
+            'jobPostedDate' => $_POST['jobPostedDate'] ?? date('Y-m-d H:i:s')
+        ];
+
         $jobID = $this->jobService->addJob($data);
 
         if ($jobID) {
-            $this->respond(['success' => true, 'jobID' => $jobID]);
+            $this->respond(['success' => true, 'jobID' => $jobID, 'coverImage' => $filename]);
         } else {
             $this->respondWithError(500, "Failed to add job");
         }

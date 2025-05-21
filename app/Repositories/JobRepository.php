@@ -51,14 +51,15 @@ public function addJob($data)
 {
     try {
         $stmt = $this->connection->prepare("
-            INSERT INTO jobs (jobTitle, jobDescription, jobCompany, location, salary) 
-            VALUES (:jobTitle, :jobDescription, :jobCompany, :location, :salary)
+            INSERT INTO jobs (coverImage, jobTitle, jobDescription, jobSalary, jobLocation, jobCompany) 
+            VALUES (:coverImage, :jobTitle, :jobDescription, :jobSalary, :jobLocation, :jobCompany)
         ");
         $stmt->bindParam(":jobTitle", $data['jobTitle']);
         $stmt->bindParam(":jobDescription", $data['jobDescription']);
         $stmt->bindParam(":jobCompany", $data['jobCompany']);
-        $stmt->bindParam(":location", $data['location']);
-        $stmt->bindParam(":salary", $data['salary']);
+        $stmt->bindParam(":jobLocation", $data['jobLocation']);
+        $stmt->bindParam(":jobSalary", $data['jobSalary']);
+        $stmt->bindParam(":coverImage", $data['coverImage']);
         $stmt->execute();
 
         return $this->connection->lastInsertId();
