@@ -55,6 +55,22 @@ $router->get('/img/(.*)', function($filename) {
     }
 });
 
+// Serve static resumes from /resume/{filename}
+$router->get('/resume/(.*)', function($filename) {
+    $filePath = __DIR__ . '/resume/' . basename($filename);
+    if (file_exists($filePath)) {
+        $mimeType = mime_content_type($filePath);
+        header('Content-Type: ' . $mimeType);
+        header('Content-Length: ' . filesize($filePath));
+        readfile($filePath);
+        exit();
+    } else {
+        http_response_code(404);
+        echo 'File not found';
+        exit();
+    }
+});
+
 // User Management endpoints
 $router->post($base . '/register', 'UserController@register');
 $router->post($base . '/login', 'UserController@login');
@@ -65,6 +81,8 @@ $router->get($base . '/job/(\d+)', 'JobController@getJobByID');
 $router->post($base . '/job/add', 'JobController@addJob');
 $router->post($base . '/job/edit/(\d+)', 'JobController@editJob');
 $router->delete($base . '/job/delete/(\d+)', 'JobController@deleteJob');
+$router->post($base . '/job/apply', 'JobApplicationController@apply');
+$router->get($base . '/job/applications/user/(\d+)', 'JobApplicationController@getApplicationsByUser');
 
 // Run the router
 $router->run();
